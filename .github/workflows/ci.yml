@@ -75,7 +75,7 @@ jobs:
         run: ruff check .
 
       - name: Build and Install Crate in Python Environment
-        run: pip install .
+        run: pip install -e .
 
       - name: Type Checking (Mypy)
         run: mypy python/

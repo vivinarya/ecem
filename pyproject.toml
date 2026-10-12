@@ -26,5 +26,4 @@ features = ["pyo3/extension-module"]
 extraPaths = ["python"]
 
 [tool.pytest.ini_options]
-pythonpath = ["python"]
 testpaths = ["tests"]
