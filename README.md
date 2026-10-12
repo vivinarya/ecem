@@ -176,7 +176,9 @@ token_logprobs = [-0.05, -0.12, -0.85, -2.40, -3.10]
 for token, logprob in zip(["The", "answer", "is", "uncertain", "data"], token_logprobs):
     status = canary.step(logprob)
     if status.triggered:
-        print(f"Anomaly detected at token '{token}': normalized entropy = {status.entropy:.4f}")
+        print(
+            f"Anomaly detected at token '{token}': normalized entropy = {status.entropy:.4f}"
+        )
 ```
 
 ---
