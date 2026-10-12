@@ -74,8 +74,8 @@ jobs:
       - name: Lint Python (Ruff)
         run: ruff check .
 
-      - name: Build and Install Crate in Dev Virtualenv
-        run: maturin develop
+      - name: Build and Install Crate in Python Environment
+        run: pip install .
 
       - name: Type Checking (Mypy)
         run: mypy python/
