@@ -1,4 +1,4 @@
-# ecem
+# Ecem
 
 High-performance epistemic graph engine, cryptographic provenance ledger, and runtime entropy monitoring for structured LLM pipelines.
 
