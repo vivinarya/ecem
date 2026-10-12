@@ -1,7 +1,7 @@
 import pytest
 from ecem import (
-    CDGNode,
     CausalGraphEngine,
+    CDGNode,
     EdgeType,
     EntityType,
     Graph,

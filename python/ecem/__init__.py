@@ -1,7 +1,7 @@
 from . import _core
 from ._core import (
-    CDGNode,
     CausalGraphEngine,
+    CDGNode,
     EdgeType,
     EntityType,
     Ledger,
@@ -13,7 +13,6 @@ Graph = CausalGraphEngine
 LatticeState = NodeState
 
 __all__ = [
-    "_core",
     "CDGNode",
     "CausalGraphEngine",
     "EdgeType",
@@ -23,4 +22,5 @@ __all__ = [
     "Ledger",
     "LedgerEntry",
     "NodeState",
+    "_core",
 ]
