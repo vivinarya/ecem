@@ -1,0 +1,35 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.pdb
+*.dll
+*.so
+*.dylib
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Rust / Cargo
+target/
+Cargo.lock
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS artifacts
+.DS_Store
+Thumbs.db

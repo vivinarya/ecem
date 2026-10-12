@@ -1,0 +1,23 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "ecem"
+version = "0.1.0"
+description = "ECEM Python-Rust library"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "maturin",
+    "pre-commit",
+]
+
+[tool.maturin]
+python-source = "python"
+module-name = "ecem._core"
+manifest-path = "crates/ecem_core/Cargo.toml"
+features = ["pyo3/extension-module"]
