@@ -1,4 +1,4 @@
-# Ecem
+# ecem
 
 High-performance epistemic graph engine, cryptographic provenance ledger, and runtime entropy monitoring for structured LLM pipelines.
 
@@ -16,7 +16,7 @@ ecem bridges high-throughput Rust graph execution and lattice-based state invali
   - [1. Environment Setup](#1-environment-setup)
   - [2. Build Native Extension](#2-build-native-extension)
 - [Usage Example](#usage-example)
-  - [Epistemic Graph and Cryptographic Ledger](#epistemic-graph-and-cryptographic-ledger)
+  - [Causal Graph and Cryptographic Ledger](#causal-graph-and-cryptographic-ledger)
   - [Runtime Entropy Canary](#runtime-entropy-canary)
 - [Testing](#testing)
 - [CI / CD Pipelines](#ci--cd-pipelines)
@@ -29,7 +29,7 @@ ecem bridges high-throughput Rust graph execution and lattice-based state invali
 - **Cryptographic Provenance Ledger**: Tamper-evident, hash-chained transaction ledger (sha2) tracking node lineage, edge transitions, and execution histories.
 - **Lattice-Based Type System**: Formal lattice enums and edge semantics for monotonic information updates and confidence bounds.
 - **Normalized Token Entropy Canary**: Real-time runtime monitor measuring prediction uncertainty and detecting anomalous token drift.
-- **Structured Extraction Pipeline**: First-class support for Instructor and Outlines schema extraction directly into graph nodes.
+- **Structured Extraction Pipeline**: First-class support for schema extraction directly into graph nodes.
 - **Zero-Overhead Bindings**: Compiled with PyO3 and packaged via Maturin for native execution speed in Python environments.
 
 ---
@@ -46,7 +46,7 @@ ecem/
 │   ├── src/types.rs              # Lattice enums, node & edge definitions
 │   └── src/lib.rs                # PyO3 Python extension bindings
 └── python/ecem/                  # Python API and orchestration
-    ├── extraction.py             # Schema parsing (Instructor / Outlines)
+    ├── extraction.py             # Schema parsing helpers
     └── canary.py                 # Normalized token entropy runtime monitor
 ```
 
@@ -56,8 +56,8 @@ ecem/
 
 1. **Extraction**: Structured outputs are parsed from LLM payloads into strongly typed schemas (`ecem.extraction`).
 2. **Entropy Canary**: Inflight token log probabilities are evaluated against entropy thresholds to detect divergence or hallucination bursts (`ecem.canary`).
-3. **Graph Ingestion**: Validated extractions are converted into lattice node states within `ecem_core.Graph`.
-4. **Invalidation & Ledgering**: Any updated or refuted upstream state triggers topological invalidation cascades, and all modifications are signed into the append-only ledger (`ecem_core.Ledger`).
+3. **Graph Ingestion**: Validated extractions are converted into lattice node states within `ecem.CausalGraphEngine`.
+4. **Invalidation & Ledgering**: Any updated or refuted upstream state triggers topological invalidation cascades, and all modifications are signed into the append-only ledger (`ecem.Ledger`).
 
 ---
 
@@ -79,7 +79,7 @@ Clone the repository and set up a virtual environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/ecem.git
+git clone https://github.com/vivinarya/ecem.git
 cd ecem
 
 # Create and activate virtual environment
@@ -87,7 +87,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\Activate.ps1
 
 # Install development toolchain
-pip install --upgrade pip maturin pre-commit pytest
+pip install --upgrade pip maturin pre-commit pytest ruff mypy
 ```
 
 ### 2. Build Native Extension
@@ -108,34 +108,58 @@ maturin develop --release
 
 ## Usage Example
 
-### Epistemic Graph and Cryptographic Ledger
+### Causal Graph and Cryptographic Ledger
 
 ```python
-from ecem import Graph, Ledger, LatticeState
+from ecem import (
+    CDGNode,
+    CausalGraphEngine,
+    EdgeType,
+    EntityType,
+    Ledger,
+    NodeState,
+)
 
-# Initialize cryptographic provenance ledger and epistemic graph
+# Initialize cryptographic provenance ledger and graph engine
 ledger = Ledger()
-graph = Graph()
+graph = CausalGraphEngine()
 
-# Insert typed lattice nodes
-root_id = graph.add_node(
-    label="claim_1",
-    state=LatticeState.Verified,
-    payload={"fact": "Model context window is 128k"}
+# Insert typed decision graph nodes
+root_node = CDGNode(
+    id="claim_1",
+    entity_type=EntityType.Decision,
+    name="context_window",
+    content="Model context window is 128k",
+    turn_created=1,
+    status=NodeState.VALID,
 )
 
-child_id = graph.add_node(
-    label="claim_2",
-    state=LatticeState.Hypothetical,
-    payload={"derived": "Batch fit confirmed"}
+child_node = CDGNode(
+    id="claim_2",
+    entity_type=EntityType.Decision,
+    name="batch_size",
+    content="Batch fit confirmed",
+    turn_created=2,
+    status=NodeState.VALID,
 )
+
+graph.insert_node(root_node)
+graph.insert_node(child_node)
 
 # Connect dependency edge and record in ledger
-graph.add_edge(root_id, child_id, relation="supports")
-ledger.record_transition(graph.state_hash())
+graph.add_dependency_edge("claim_2", "claim_1", EdgeType.DependsOn)
+ledger.record_transition("state_hash_turn_2")
 
 # Invalidate upstream node and cascade through dependents
-invalidated = graph.invalidate(root_id)
+replacement_node = CDGNode(
+    id="claim_1_v2",
+    entity_type=EntityType.Decision,
+    name="context_window",
+    content="Model context window is 64k",
+    turn_created=3,
+)
+
+invalidated = graph.mutate_and_cascade("claim_1", replacement_node, turn_id=3)
 print(f"Nodes invalidated: {invalidated}")
 ```
 
@@ -166,7 +190,7 @@ Run native Rust unit tests and Python integration tests:
 cargo test --workspace
 
 # Run Python integration test suite
-pytest tests/python
+pytest tests/ -v
 
 # Validate pre-commit hooks across the repository
 pre-commit run --all-files

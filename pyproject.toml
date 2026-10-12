@@ -21,3 +21,10 @@ python-source = "python"
 module-name = "ecem._core"
 manifest-path = "crates/ecem_core/Cargo.toml"
 features = ["pyo3/extension-module"]
+
+[tool.pyright]
+extraPaths = ["python"]
+
+[tool.pytest.ini_options]
+pythonpath = ["python"]
+testpaths = ["tests"]
